@@ -23,7 +23,7 @@ class ApplicationsController < ApplicationController
   def update
     application = Application.find(params[:id])
     if application.update(application_params)
-      application.update(status: "Pending")
+      application.update(app_status: "Pending")
       flash[:success] = "YOU DID IT!"
     else
       flash[:error] = "The following problems prevented us from saving your application:\n#{application.errors.full_messages.to_sentence}"
