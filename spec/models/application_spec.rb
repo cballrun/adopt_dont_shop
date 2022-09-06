@@ -21,7 +21,7 @@ RSpec.describe Application, type: :model do
 
   describe "default attributes" do
     it 'defaults status to In Progress' do
-      expect(@app_1.status).to eq("In Progress")
+      expect(@app_1.app_status).to eq("In Progress")
     end
   end
 

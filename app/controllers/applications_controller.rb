@@ -22,6 +22,7 @@ class ApplicationsController < ApplicationController
 
   def update
     application = Application.find(params[:id])
+
     if application.update(application_params) && params[:description] != ''
       application.update(status: "Pending")
       flash[:success] = "YOU DID IT!"
