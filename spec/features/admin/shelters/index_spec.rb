@@ -32,4 +32,12 @@ RSpec.describe 'the admin shelters index page' do
       expect(page).to have_content(@shelter_2.name)
     end
   end
+
+  it 'displays a section for shelters with pending applications' do
+    visit "/admin/shelters"
+
+    within("#shelterappsPending") do
+      expect(page).to have_content("Shelters with Pending Applications:\nHumane Society, Mystery Building")
+    end
+  end
 end
