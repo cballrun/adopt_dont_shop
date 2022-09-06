@@ -7,3 +7,10 @@
 <% end %>
   </section>
 </div>
+
+<div>
+  <section id="shelterappsPending">
+    <h3>Shelters with Pending Applications: </h3>
+    <p><%= @pending_shelters_filtered.map(&:name).join(', ') %></p>
+  </section>
+</div>
