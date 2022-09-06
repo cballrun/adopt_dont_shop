@@ -30,4 +30,12 @@ RSpec.describe Application, type: :model do
     expect(@app_2.search_pet("g")).to eq([@pet_3])
   end
 
+  describe 'validations' do
+    it { should validate_presence_of(:name) }
+    it { should validate_presence_of(:street_address) }
+    it { should validate_presence_of(:city) }
+    it { should validate_presence_of(:state) }
+    it { should validate_presence_of(:zip_code) }
+  end
+
 end
