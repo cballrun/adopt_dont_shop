@@ -11,88 +11,142 @@ RSpec.describe 'the application show' do
     @pet_app_1 = ApplicationPet.create!(application: @app_1, pet: @pet_1)
   end
 
-  it "shows the application and all its attributes" do
-    visit "/applications/#{@app_1.id}"
+  describe 'the app information section' do
+    it "shows the application and all its attributes" do
+      visit "/applications/#{@app_1.id}"
+      within('#appInfo') do
+        expect(page).to have_content(@app_1.name)
+        expect(page).to have_content(@app_1.street_address)
+        expect(page).to have_content(@app_1.city)
+        expect(page).to have_content(@app_1.state)
+        expect(page).to have_content(@app_1.zip_code)
+        expect(page).to have_content(@app_1.description)
+        expect(page).to have_content(@app_1.app_status)
+        # expect(page).to have_content(@pet_1.name)
 
-    expect(page).to have_content(@app_1.name)
-    expect(page).to have_content(@app_1.street_address)
-    expect(page).to have_content(@app_1.city)
-    expect(page).to have_content(@app_1.state)
-    expect(page).to have_content(@app_1.zip_code)
-    expect(page).to have_content(@app_1.description)
-    expect(page).to have_content(@app_1.app_status)
-    expect(page).to have_content(@pet_1.name)
-
-    expect(page).to_not have_content(@pet_2.name)
-    expect(page).to_not have_content(@app_2.name)
-  end
-
-  describe 'the Add A Pet To This Application section'
-  it 'exists and has a form with a button to search a pet' do
-    visit "/applications/#{@app_1.id}"
-
-    within("#addPet") do
-      expect(page).to have_content('Add a Pet to this Application')
-      expect(find('form')).to have_content('Search')
-      expect(page).to have_button("Search Pets By Name")
-      expect(page).to_not have_content(@app_1.name)
+        # expect(page).to_not have_content(@pet_2.name)
+        expect(page).to_not have_content(@app_2.name)
+      end
     end
   end
 
-  it 'searches for a pet' do
-    visit "/applications/#{@app_1.id}"
+  describe 'the Add A Pet To This Application section' do
+    describe 'the pet search bar' do
+      it 'exists and has a form with a button to search a pet' do
+        visit "/applications/#{@app_1.id}"
 
-    within("#addPet") do
-      fill_in('Search', with: 'scoo')
-      click_button("Search Pets By Name")
+        within("#searchPets") do
+          expect(page).to have_content('Add a Pet to this Application')
+          expect(find('form')).to have_content('Search')
+          expect(page).to have_button("Search Pets By Name")
+          expect(page).to_not have_content(@app_1.name)
+        end
+      end
 
+      it 'searches for a pet with a partial name match' do
+        visit "/applications/#{@app_1.id}"
+
+        within("#searchPets") do
+          fill_in('Search', with: 'scoo')
+          click_button("Search Pets By Name")
+
+          expect(current_path).to eq("/applications/#{@app_1.id}")
+          expect(page).to have_content(@pet_1.name)
+          expect(page).to_not have_content(@pet_2.name)
+        end
+      end
+
+      it 'returns all pets with partial matches when typed into the search bar and is case insensitive' do
+        shelter_1 = Shelter.create!(name: 'Mystery Building', city: 'Irvine CA', foster_program: false, rank: 9)
+        fancy_francis = shelter_1.pets.create!(name: "Sir Francis", breed: "Sphinx", age: 6, adoptable: true)
+        fran = shelter_1.pets.create!(name: "Fran", breed: "Calico", age: 3, adoptable: true)
+        visit "/applications/#{@app_2.id}"
+    
+        within("#searchPets") do
+          fill_in('Search', with: 'fran')
+          click_button("Search Pets By Name")
+          
+          expect(current_path).to eq("/applications/#{@app_2.id}")
+          expect(page).to have_content(fancy_francis.name)
+          expect(page).to have_content(fran.name)
+        end
+      end
+    end
+
+    describe 'the Adopt this Pet button' do
+      it 'does not exist if a pet has not been searched for' do
+        visit "/applications/#{@app_1.id}"
+        within("#searchPets") do
+          expect(current_path).to eq("/applications/#{@app_1.id}")
+          expect(page).to_not have_content("Adopt This Pet")
+        end
+      end
+
+      it 'shows up once a pet has been searched for' do
+        visit "/applications/#{@app_1.id}"
+        within("#searchPets") do
+          fill_in('Search', with: 'scoo')
+          click_button("Search Pets By Name")
+          
+          expect(current_path).to eq("/applications/#{@app_1.id}")
+          expect(page).to have_button("Adopt This Pet")
+        end
+      end
+
+      it 'adds a pet to an application' do
+        visit "/applications/#{@app_1.id}"
+        within("#addPet") do
+          fill_in('Search', with: 'scoo')
+          click_button("Search Pets By Name")
+          
+          click_on "Adopt This Pet"
+
+          expect(current_path).to eq("/applications/#{@app_1.id}")
+          expect(page).to have_content('Scooby')
+        end
+      end
+    end
+  end
+
+
+  describe 'submitting an application' do
+    it 'changes an applications status after submission' do
+      visit "/applications/#{@app_1.id}"
+      expect(page).to have_content('Status: In Progress')
+
+      fill_in 'What Would Make You A Great Owner?', with: "this is a description"
+      click_button 'Submit'
+      
       expect(current_path).to eq("/applications/#{@app_1.id}")
-      expect(page).to have_content(@pet_1.name)
-      expect(page).to_not have_content(@pet_2.name)
+      expect(page).to have_content('Status: Pending')
     end
-  end
 
-  it 'has a button Adopt this Pet that adds a pet to an application' do
-    visit "/applications/#{@app_1.id}"
-
-    # within("#addPet") do
-    fill_in('Search', with: 'scoo')
-    click_button("Search Pets By Name")
-
-    click_on "Adopt This Pet"
-
-    expect(page).to have_content('Scooby')
-  end
-
-  it 'returns all pets with partial matches when typed into the search bar and is case insensitive' do
-    shelter_1 = Shelter.create!(name: 'Mystery Building', city: 'Irvine CA', foster_program: false, rank: 9)
-    fancy_francis = shelter_1.pets.create!(name: "Sir Francis", breed: "Sphinx", age: 6, adoptable: true)
-    fran = shelter_1.pets.create!(name: "Fran", breed: "Calico", age: 3, adoptable: true)
-    visit "/applications/#{@app_2.id}"
-
-    within("#addPet") do
-      fill_in('Search', with: 'fran')
-      click_button("Search Pets By Name")
-
-      expect(page).to have_content(fancy_francis.name)
-      expect(page).to have_content(fran.name)
+    describe 'the application submission form' do
+      it 'has a form for application submission' do
+        visit "/applications/#{@app_1.id}"
+        within("#submitApp") do
+          expect(find('form')).to have_content("What Would Make You A Great Owner?")
+          expect(find('form')).to have_field(:description)
+        end
+      end
     end
-  end
+    
 
   it 'shows the filled out application with pending status and the pets the user wants to adopt' do
     visit "/applications/#{@app_1.id}"
     expect(page).to have_content('Status: In Progress')
-
+    
     fill_in 'What Would Make You A Great Owner?', with: "this is a description"
 
     click_button 'Submit'
 
-    expect(current_path).to eq("/applications/#{@app_1.id}")
-    expect(page).to have_content('Status: Pending')
-    expect(page).to have_content('YOU DID IT!')
-    expect(page).to_not have_content('Search pet')
-    expect(page).to_not have_content('What Would Make You A Great Owner?')
+    # expect(current_path).to eq("/applications/#{@app_1.id}")
+    # expect(page).to have_content('Status: Pending')
+    # expect(page).to have_content('YOU DID IT!')
+    # expect(page).to_not have_content('Search pet')
+    # expect(page).to_not have_content('What Would Make You A Great Owner?')
   end
+end
 
   it 'displays an error message when no description is typed in' do
     visit "/applications/#{@app_1.id}"
