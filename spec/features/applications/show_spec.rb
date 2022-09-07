@@ -43,19 +43,6 @@ RSpec.describe 'the application show' do
         end
       end
 
-      it 'searches for a pet with a partial name match' do
-        visit "/applications/#{@app_1.id}"
-
-        within("#searchPets") do
-          fill_in('Search', with: 'scoo')
-          click_button("Search Pets By Name")
-
-          expect(current_path).to eq("/applications/#{@app_1.id}")
-          expect(page).to have_content(@pet_1.name)
-          expect(page).to_not have_content(@pet_2.name)
-        end
-      end
-
       it 'returns all pets with partial matches when typed into the search bar and is case insensitive' do
         shelter_1 = Shelter.create!(name: 'Mystery Building', city: 'Irvine CA', foster_program: false, rank: 9)
         fancy_francis = shelter_1.pets.create!(name: "Sir Francis", breed: "Sphinx", age: 6, adoptable: true)
@@ -109,6 +96,26 @@ RSpec.describe 'the application show' do
   end
 
   describe 'submitting an application' do
+    describe 'the application submission form' do
+      it 'has a form with correct attributes for application submission' do
+        visit "/applications/#{@app_1.id}"
+        within("#submitApp") do
+          expect(find('form')).to have_content("What Would Make You A Great Owner?")
+          expect(find('form')).to have_field(:description)
+          expect(find('form')).to have_button("Submit")
+        end
+      end
+
+      it 'does not display the form if no pets are added to the application' do
+        visit "/applications/#{@app_2.id}"
+        within("#submitApp") do
+          expect(page).to_not have_content('What Would Make You A Great Owner?')
+          expect(page).to_not have_button('Submit')
+        end
+      end
+    end
+    
+    
     describe 'the application update' do
       describe 'successful applications' do
         it 'changes an applications status after submission' do
@@ -148,65 +155,39 @@ RSpec.describe 'the application show' do
     
       describe 'unsuccessful applications' do
         it 'flashes an error message if user does not input a description' do
-
+          visit "/applications/#{@app_1.id}"
+          expect(page).to_not have_content("Please fill in the What Would Make You A Great Owner section")
+          
+          fill_in 'What Would Make You A Great Owner?', with: '' 
+          click_button 'Submit'
+          
+          expect(current_path).to eq("/applications/#{@app_1.id}")
+          expect(page).to have_content("Please fill in the What Would Make You A Great Owner section")
         end
-      end
-   
+        
+        it 'still has search and submit functions after unsuccessful submission' do
+          visit "/applications/#{@app_1.id}"
+          expect(page).to have_content('Search pet')
+          expect(page).to have_content('What Would Make You A Great Owner?')
+          
+          fill_in 'What Would Make You A Great Owner?', with: '' 
+          click_button 'Submit'
 
- 
-
-      it 'flashes an error message and takes user back to the original page if user does not input a description' do
+          expect(page).to have_content('Search pet')
+          expect(page).to have_content('What Would Make You A Great Owner?')
+        end
       
-      end
-    
-    end
-
-    describe 'the application submission form' do
-      it 'has a form for application submission' do
-        visit "/applications/#{@app_1.id}"
-        within("#submitApp") do
-          expect(find('form')).to have_content("What Would Make You A Great Owner?")
-          expect(find('form')).to have_field(:description)
-          expect(find('form')).to have_button("Submit")
+        it 'does not change the applications status' do
+          visit "/applications/#{@app_1.id}"
+          expect(page).to have_content('Status: In Progress')
+        
+          fill_in 'What Would Make You A Great Owner?', with: '' 
+          click_button 'Submit'
+        
+          expect(page).to have_content('Status: In Progress')
         end
       end
     end
-    
-
-  it 'shows the filled out application with pending status and the pets the user wants to adopt' do
-    visit "/applications/#{@app_1.id}"
-    expect(page).to have_content('Status: In Progress')
-    
-    fill_in 'What Would Make You A Great Owner?', with: "this is a description"
-
-    click_button 'Submit'
-
-    # expect(current_path).to eq("/applications/#{@app_1.id}")
-    # expect(page).to have_content('Status: Pending')
-    # expect(page).to have_content('YOU DID IT!')
-    # expect(page).to_not have_content('Search pet')
-    # expect(page).to_not have_content('What Would Make You A Great Owner?')
-  end
-end
-
-  it 'displays an error message when no description is typed in' do
-    visit "/applications/#{@app_1.id}"
-
-    fill_in 'What Would Make You A Great Owner?', with: '' 
-
-    click_button 'Submit'
-
-    expect(current_path).to eq("/applications/#{@app_1.id}")
-    expect(page).to have_content('Status: In Progress')
-    expect(page).to have_content('Search pet')
-    expect(page).to have_content("Please fill in the What Would Make You A Great Owner section")
-  end
-
-  it 'does not display a submit button if pets have not been added' do
-    visit "/applications/#{@app_2.id}"
-
-    expect(page).to_not have_content('What Would Make You A Great Owner?')
-    expect(page).to_not have_button('Submit')
   end
 end
 
