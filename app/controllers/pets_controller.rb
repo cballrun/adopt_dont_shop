@@ -13,6 +13,7 @@ class PetsController < ApplicationController
 
   def new
     @shelter = Shelter.find(params[:shelter_id])
+    @pet = Pet.new(adoptable: true)
   end
 
   def create
