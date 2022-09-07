@@ -17,8 +17,4 @@ class ApplicationPetsController < ApplicationController
     end
     redirect_to "/admin/applications/#{@pet_app.application_id}"
   end
-
-  def application_pet_params
-    params.permit(:application_id, :pet_id, :status)
-  end
 end
