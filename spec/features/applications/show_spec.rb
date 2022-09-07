@@ -115,9 +115,8 @@ RSpec.describe 'the application show' do
       end
     end
     
-    
     describe 'the application update' do
-      describe 'successful applications' do
+      context 'successful applications' do
         it 'changes an applications status after submission' do
           visit "/applications/#{@app_1.id}"
           expect(page).to have_content('Status: In Progress')
@@ -153,7 +152,7 @@ RSpec.describe 'the application show' do
         end
       end
     
-      describe 'unsuccessful applications' do
+      context 'unsuccessful applications' do
         it 'flashes an error message if user does not input a description' do
           visit "/applications/#{@app_1.id}"
           expect(page).to_not have_content("Please fill in the What Would Make You A Great Owner section")
