@@ -20,11 +20,8 @@ RSpec.describe 'the application show' do
         expect(page).to have_content(@app_1.city)
         expect(page).to have_content(@app_1.state)
         expect(page).to have_content(@app_1.zip_code)
-        expect(page).to have_content(@app_1.description)
         expect(page).to have_content(@app_1.app_status)
-        # expect(page).to have_content(@pet_1.name)
 
-        # expect(page).to_not have_content(@pet_2.name)
         expect(page).to_not have_content(@app_2.name)
       end
     end
