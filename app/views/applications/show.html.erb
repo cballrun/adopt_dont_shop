@@ -1,53 +1,60 @@
 <h1>Applications</h1>
 
+<section id = "appInfo">
 <p>Name: <%= @application.name %> </p>
 <p>Street address: <%= @application.street_address %> </p>
 <p>City: <%= @application.city %> </p>
 <p>State: <%= @application.state %> </p>
 <p>Zip code: <%= @application.zip_code %> </p>
 <p>Status: <%= @application.app_status %> </p>
+ </section>
 
+<section id = "addPet">
+
+<div id = "searchPets">
 <% if @application.app_status == "In Progress" %>
-  <section id="addPet">
-    <h2> Add a Pet to this Application </h2>
-    <%= form_with url: "/applications/#{@application.id}", method: :get, local: true do |f| %>
-      <%= f.label :search_pet %>
-      <%= f.text_field :search_pet %>
-      <%= f.submit "Search Pets By Name" %>
-    <% end %>
+<h2> Add a Pet to this Application </h2>
+  <%= form_with url: "/applications/#{@application.id}", method: :get, local: true do |f| %>
+    <%= f.label :search_pet %>
+    <%= f.text_field :search_pet %>
+    <%= f.submit "Search Pets By Name" %>
+<% end %>
 
-    <% if @searched_pets.present? %>
-      <% @searched_pets.each do |pet| %>
-        <p> <%= pet.name %>  </p>
-        <%= form_with url: "/applications/#{@application.id}", method: :post, local: true do |f| %>
-          <%= f.hidden_field :pet_id, value: pet.id %>
-          <%= f.submit "Adopt This Pet" %>
-        <% end %>
-      <% end %>
+<% if @searched_pets.present? %>
+  <% @searched_pets.each do |pet| %>
+    <ul> <%= pet.name %>  </ul>
+    <%= form_with url: "/applications/#{@application.id}", method: :post, local: true do |f| %>
+        <%= f.hidden_field :pet_id, value: pet.id %>
+        <%= f.submit "Adopt This Pet" %>
     <% end %>
-    <h3>Pets I Want To Adopt</h3>
-    <% @application.pets.each do |pet| %>
-      <p> <%= pet.name %> </p>
-    <% end %>
-  </section>
-
-  <% if @application.pets.any? %>
-    <section id="submitForm">
-      <%= form_with url: "/applications/#{@application.id}", method: :patch, local: true do |f| %>
-        <h3><%= f.label :description, "What Would Make You A Great Owner?" %></h3>
-        <%= f.text_area :description, value: @application.description %> currently things can be submitted without a description being added
-        <br/>
-        <%= f.submit "Submit"%>
-      <% end %>
-    </section>
   <% end %>
 <% end %>
+</div>
 
+<div id = "myPets">
+<h3>Pets I Want To Adopt</h3>
+<% @application.pets.each do |pet| %>
+  <ul> <%= pet.name %> </ul>
+<% end %>
+</div>
+</section>
+
+<section id = "submitApp">
+<% if @application.pets.any? %>
+  <%= form_with url: "/applications/#{@application.id}", method: :patch, local: true do |f| %>
+  <h3><%= f.label :description, "What Would Make You A Great Owner?" %></h3>
+      <%= f.text_area :description, value: @application.description %> <br>
+      <%= f.submit "Submit"%>
+      <% end %>
+    <% end %>
+  <% end %>
+</section>
+
+<section id = "viewPets">
 <% if @application.app_status == "Pending" %>
   <h5>Pets you've applied to adopt:</h5>
-  <ul>
-    <% @application.pets.each do |pet| %>
-      <li><%= pet.name %></li>
-    <% end %>
-  </ul>
+  <% @application.pets.each do |pet| %>
+      <ul><%= pet.name %></ul>
+   <% end %>
 <% end %>
+</section>

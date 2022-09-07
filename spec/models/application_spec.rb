@@ -15,8 +15,16 @@ RSpec.describe Application, type: :model do
   end
   
   describe "relationships" do
-    # it { should have_many :application_pets}
+    it { should have_many :application_pets}
     it {should have_many(:pets).through(:application_pets)}
+  end
+
+  describe 'validations' do
+    it { should validate_presence_of(:name) }
+    it { should validate_presence_of(:street_address) }
+    it { should validate_presence_of(:city) }
+    it { should validate_presence_of(:state) }
+    it { should validate_presence_of(:zip_code) }
   end
 
   describe "default attributes" do
@@ -25,9 +33,12 @@ RSpec.describe Application, type: :model do
     end
   end
 
-  it 'searches for a pet' do
-    expect(@app_1.search_pet("fr")).to eq([@pet_2])
-    expect(@app_2.search_pet("g")).to eq([@pet_3])
+  describe 'instance methods' do
+    describe "#search_pet" do
+      it 'searches for a pet with partial names' do
+        expect(@app_1.search_pet("fr")).to eq([@pet_2])
+        expect(@app_2.search_pet("g")).to eq([@pet_3])
+      end
+    end
   end
-
 end
