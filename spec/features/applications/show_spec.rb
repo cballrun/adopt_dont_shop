@@ -110,15 +110,44 @@ RSpec.describe 'the application show' do
 
 
   describe 'submitting an application' do
-    it 'changes an applications status after submission' do
-      visit "/applications/#{@app_1.id}"
-      expect(page).to have_content('Status: In Progress')
+    describe 'the application update' do
+      describe 'successful applications' do
+      it 'changes an applications status after submission' do
+        visit "/applications/#{@app_1.id}"
+        expect(page).to have_content('Status: In Progress')
 
-      fill_in 'What Would Make You A Great Owner?', with: "this is a description"
-      click_button 'Submit'
-      
-      expect(current_path).to eq("/applications/#{@app_1.id}")
-      expect(page).to have_content('Status: Pending')
+        fill_in 'What Would Make You A Great Owner?', with: "this is a description"
+        click_button 'Submit'
+        
+        expect(current_path).to eq("/applications/#{@app_1.id}")
+        expect(page).to have_content('Status: Pending')
+      end
+
+      it 'flashes a success message with successful application' do
+        visit "/applications/#{@app_1.id}"
+        expect(page).to_not have_content("YOU DID IT!")
+
+        fill_in 'What Would Make You A Great Owner?', with: "this is a description"
+        click_button 'Submit'
+        
+        expect(current_path).to eq("/applications/#{@app_1.id}")
+        expect(page).to have_content("YOU DID IT!")
+      end
+    end
+
+ 
+
+      it 'flashes an error message and takes user back to the original page if user does not input a description' do
+        visit "/applications/#{@app_1.id}"
+        expect(page).to_not have_content("YOU DID IT!")
+
+        fill_in 'What Would Make You A Great Owner?', with: "this is a description"
+        click_button 'Submit'
+        
+        expect(current_path).to eq("/applications/#{@app_1.id}")
+        expect(page).to have_content("YOU DID IT!")
+      end
+    
     end
 
     describe 'the application submission form' do
@@ -127,6 +156,7 @@ RSpec.describe 'the application show' do
         within("#submitApp") do
           expect(find('form')).to have_content("What Would Make You A Great Owner?")
           expect(find('form')).to have_field(:description)
+          expect(find('form')).to have_button("Submit")
         end
       end
     end
